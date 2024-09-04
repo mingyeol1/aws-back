@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz.thymeleaf/layout"
+      layout:decorate="~{layout/basic.html}">
+
+<!-- 레이아웃용 -->
+<div layout:fragment="content">
+
+    <!-- 검색 화면 추가 -->
+    <div class="row mt-3">
+        <form action="/board/list" method="get">
+            <div class="col">
+                <input type="hidden" name="size" th:value="${pageRequestDTO.size}">
+                <div class="input-group">
+                    <div class="input-group-prepend">
+                        <select class="form-select" name="type">
+                            <option value="">---</option>
+                            <option value="t" th:selected="${pageRequestDTO.type == 't'}">제목</option>
+                            <option value="c" th:selected="${pageRequestDTO.type == 'c'}">내용</option>
+                            <option value="w" th:selected="${pageRequestDTO.type == 'w'}">작성자</option>
+                            <option value="tc" th:selected="${pageRequestDTO.type == 'tc'}">제목 내용</option>
+                            <option value="tcw" th:selected="${pageRequestDTO.type == 'tcw'}">제목 내용 작성자</option>
+                        </select>
+                    </div>
+                    <input type="text" class="form-control" name="keyword" th:value="${pageRequestDTO.keyword}">
+                    <div class="input-group-append">
+                        <button class="btn btn-outline-secondary searchBtn" type="submit">Search</button>
+                        <button class="btn btn-outline-secondary clearBtn" type="button">Clear</button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- 목록 정보 출력 -->
+    <div class="row mt-3">
+        <div class="col">
+            <div class="card">
+                <div class="card-header">
+                    Board List
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Board List</h5>
+
+                    <table class="table">
+                        <thead> <!-- 테이블 목록 -->
+                        <tr>
+                            <th scope="col">Bno</th>
+                            <th scope="col">Title</th>
+                            <th scope="col">Writer</th>
+                            <th scope="col">RegDate</th>
+                        </tr>
+                        </thead>
+                        <tbody class="list-group boardList" th:with="link = ${pageRequestDTO.getLink()}">
+<!--
+                        <tbody th:with="link = ${pageRequestDTO.getLink()}">  < !-- 테이블에 실제 출력 데이터 -- >
+                        <tr th:each="dto:${responseDTO.dtoList}" >
+                            <th scope="row">[[${dto.bno}]]</th>
+                            <td>
+                            <a th:href="|@{/board/read(bno = ${dto.bno})}&${link}|" class="text-decoration-none">
+                                    [[${dto.title}]]
+                            </a>
+                            < !--/* <span class="badge progress-bar-success" style="background-color:#0a53be">[[${dto.replyCount}]]</span> */-- >
+                            </td>
+                            <td>[[${dto.writer}]]</td>
+                            <td>[[${#temporals.format(dto.regDate, 'yyyy-MM-dd')}]]</td>
+                        </tr>
+                        </tbody>
+-->
+
+                        </tbody>
+                    </table>
+
+                    <div class="float-end">
+                        <ul class="pagination flex-wrap">
+
+                            <li class="page-item" th:if="${responseDTO.prev}">
+                                <a class="page-link" th:data-num="${responseDTO.start -1 }">Previous</a>
+                            </li>
+
+                            <th:block th:each="i : ${#numbers.sequence(responseDTO.start, responseDTO.end)}">
+                                <li th:class="${responseDTO.page == i} ? 'page-item active':'page-item'">
+                                    <a class="page-link" th:data-num="${i}">[[${i}]]</a>
+                                </li>
+                            </th:block>
+
+                            <li class="page-item" th:if="${responseDTO.next}">
+                                <a class="page-link" th:data-num="${responseDTO.end + 1}">Next</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="float-end boardPaging">
+                        console.log(get1())
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+    <!--    모달창      -->
+    <div class="modal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Modal title</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Modal body text goes here.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-primary">Save changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- reply를 처리하기 위한 javascript 라이브러리 불러오기...  -->
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="/js/board.js"></script>
+
+</div>
+
+<script layout:fragment="script" th:inline="javascript">
+    // 이벤트 처리...
+    // 페이지 번호 클릭시 검색 창에 있는 form 의 hidden으로 page추가 후 submit 처리...
+    // Clear 버튼 누를 경우... 검색 조건 없이 /board/list 호출
+
+    console.log("script.... list의 스크립트")
+
+    document.querySelector(".pagination").addEventListener("click", function (e) {
+        e.preventDefault()
+        e.stopPropagation()
+
+        const target = e.target
+
+        // console.log(target)
+        if(target.tagName !== 'A') {  // A태그만 사용!!!
+            return
+        }
+
+        const num = target.getAttribute("data-num")
+        const formObj = document.querySelector("form")
+        formObj.innerHTML += `<input type='hidden' name='page' value='${num}'>`
+        formObj.submit();
+
+    }, false)
+
+    document.querySelector(".clearBtn").addEventListener("click", function (e) {
+        e.preventDefault()
+        e.stopPropagation()
+
+        self.location = '/board/list'
+
+    }, false)
+
+    //show modal
+    const result = [[${result}]]
+
+    const modal = new bootstrap.Modal(document.querySelector(".modal"))
+
+    if(result) {
+        modal.show()
+    }
+    // if(result){
+    //     alert(result)
+    // }
+
+
+
+
+
+
+
+
+
+    get1().then(data => {  //정상적 값
+      console.log(data)
+    }).catch(e =>{   // 실패,에러...
+      console.error(e)
+    })
+
+    // console.log("list.html script loaded"); // HTML 스크립트 로드 확인
+    //
+    // get1().then(data => {
+    //     console.log("Data received:", data); // 성공적인 응답 로그 출력
+    // }).catch(e => {
+    //     console.error("Error received:", e); // 에러 로그 출력
+    // });
+    //
+    // const boardList = document.querySelector('.boardList')      // 댓글 목록 DOM
+    // const boardPaging = document.querySelector('.boardPaging')  // 댓글 페이지 목록 DOM
+    //
+    // function boardPrintList(dtoList) {   // 게시글 목록 출력
+    //     let str = '';
+    //     if(dtoList && dtoList.length > 0) {
+    //         for (const dto of dtoList) {
+    //             str +=`
+    //                 <tr th:each="dto:${responseDTO.dtoList}" >
+    //                         <th scope="row">[[${dto.bno}]]</th>
+    //                         <td>
+    //                         <a th:href="|@{/board/read(bno = ${dto.bno})}&${link}|" class="text-decoration-none">
+    //                                 [[${dto.title}]]
+    //                         </a>
+    //                         </td>
+    //                         <td>[[${dto.writer}]]</td>
+    //                         <td>[[${#temporals.format(dto.regDate, 'yyyy-MM-dd')}]]</td>
+    //                     </tr>
+    //
+    //             <li class="list-group-item d-flex replyItem">
+    //           <span class="col-2">${dto.rno}</span>
+    //           <span class="col-6" data-rno="${dto.rno}">${dto.replyText}</span>
+    //           <span class="col-2">${dto.replyer}</span>
+    //           <span class="col-2">${dto.regDate}</span>
+    //           </li>`
+    //         }
+    //     }
+    //     boardList.innerHTML = str
+    // }
+    //
+    // function boardPrintPages(data) {   //댓글 페이지 목록 출력
+    //     //pagination
+    //     let pageStr = '';
+    //     //이전 버튼
+    //     if(data.prev) {
+    //         pageStr += `<li class="page-item">
+    //                 <a class="page-link" data-page="${data.start - 1}">PREV</a>
+    //              </li>`}
+    //     //페이지 번호...
+    //     for (let i = data.start; i <= data.end; i++ ){
+    //         pageStr += `<li class="page-item ${i == data.page? "active":""}">
+    //                 <a class="page-link" data-page="${i}">${i}</a>
+    //             </li>`}
+    //     // 다음 버튼
+    //     if(data.next) {
+    //         pageStr += `<li class="page-item">
+    //                 <a class="page-link" data-page="${data.end + 1}">NEXT</a>
+    //              </li>`}
+    //     boardPaging.innerHTML = pageStr
+    // }
+    //
+    // function printBoards() {
+    //     // console.log("printReplies : "+bno, page, size)
+    //     getBoardList().then(
+    //         data => {// console.log(data)
+    //             boardPrintList(data.dtoList)  //목록 처리
+    //             boardPrintPages(data)         //페이지 처리
+    //             // console.log("total : "+data.total)
+    //         }
+    //     ).catch(e => {
+    //         console.log(e)
+    //     })
+    // }
+    // //함수 호출
+    // printBoards()
+
+
+</script>
+
+</html>

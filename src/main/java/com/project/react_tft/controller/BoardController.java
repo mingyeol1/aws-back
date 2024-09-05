@@ -41,7 +41,7 @@ public class BoardController {
 //        model.addAttribute("responseDTO",responseDTO);
 //    }
 
-    @Operation(summary = "REST방식 Board Get방식으로 게시글 처리..")
+    @Operation(summary = "REST방식 Board Get방식으로 게시글 처리..123123")
     @GetMapping(value = "/list")
     public ResponseEntity<PageResponseDTO<BoardDTO>> getList(PageRequestDTO pageRequestDTO){
 //        PageResponseDTO<BoardDTO> responseDTO = boardService.getList(pageRequestDTO);

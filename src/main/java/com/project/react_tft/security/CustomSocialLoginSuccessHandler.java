@@ -67,6 +67,6 @@ public class CustomSocialLoginSuccessHandler implements AuthenticationSuccessHan
 
         // 클라이언트로 리다이렉트
 
-        response.sendRedirect("https://www.tft.p-e.kr/");
+        response.sendRedirect("http://localhost:3000/");
     }
 }

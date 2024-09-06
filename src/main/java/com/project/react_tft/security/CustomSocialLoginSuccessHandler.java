@@ -54,12 +54,12 @@ public class CustomSocialLoginSuccessHandler implements AuthenticationSuccessHan
         Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
         accessTokenCookie.setPath("/");
         accessTokenCookie.setSecure(true);
-        accessTokenCookie.setDomain("https://dev.tft.p-e.kr"); // 배포한 도메인 설정
+        accessTokenCookie.setDomain(".tft.p-e.kr"); // 배포한 도메인 설정
 //        accessTokenCookie.setHttpOnly(true);  이거 포함시키면 클라이언트측에서 토큰값 못받아옴.
         accessTokenCookie.setMaxAge(60 * 60); // 1 hour
 
         Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
-        refreshTokenCookie.setDomain("https://dev.tft.p-e.kr");
+        refreshTokenCookie.setDomain(".tft.p-e.kr");
         refreshTokenCookie.setPath("/");
         refreshTokenCookie.setSecure(true);
 //        refreshTokenCookie.setHttpOnly(true);

@@ -1,5 +1,6 @@
 package com.project.react_tft.service;
 
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.project.react_tft.Repository.MeetBoardRepository;
 import com.project.react_tft.domain.Board;
 import com.project.react_tft.domain.MeetBoard;
@@ -9,12 +10,14 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -26,8 +29,13 @@ import java.util.stream.Collectors;
 @Log4j2
 public class MeetboardServiceImpl implements MeetBoardService {
 
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
+
     private final MeetBoardRepository meetBoardRepository;
     private final ModelMapper modelMapper;
+    private final AmazonS3Client amazonS3Client;
 
     @Override
     public Long registerMeet(MeetBoardDTO meetBoardDTO) {
@@ -125,10 +133,20 @@ public class MeetboardServiceImpl implements MeetBoardService {
 
         Page<MeetBoardListAllDTO> result = meetBoardRepository.searchWithAll(types, keyword, pageable);
 
+        // 이미지 URL을 설정하는 부분 추가
+        result.forEach(meetBoard -> {
+            List<String> imageUrls = new ArrayList<>();
+            meetBoard.getMeetBoardImages().forEach(image -> {
+                String s3Url = amazonS3Client.getUrl(bucket, image.getUuid() + "_" + image.getFileName()).toString();
+                imageUrls.add(s3Url);
+            });
+            meetBoard.setImageUrls(imageUrls); // DTO에 S3 URL 설정
+        });
+
         return PageResponseDTO.<MeetBoardListAllDTO>withAll()
                 .pageRequestDTO(pageRequestDTO)
                 .dtoList(result.getContent())
-                .total((int)result.getTotalElements())
+                .total((int) result.getTotalElements())
                 .build();
     }
 

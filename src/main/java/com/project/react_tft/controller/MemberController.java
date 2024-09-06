@@ -47,6 +47,7 @@ public class MemberController {
         }
     }
 
+    @CrossOrigin(origins = "https://www.tft.p-e.kr")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody MemberDTO dto) {
         Member member = memberService.login(dto.getMid(), dto.getMpw());

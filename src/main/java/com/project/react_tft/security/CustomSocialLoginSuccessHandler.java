@@ -53,14 +53,14 @@ public class CustomSocialLoginSuccessHandler implements AuthenticationSuccessHan
         // 쿠키 생성
         Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
         accessTokenCookie.setPath("/");
-//        accessTokenCookie.setSecure(true);
-//        accessTokenCookie.setHttpOnly(true);  이거 포함시키면 클라이언트측에서 토큰값 못받아옴.
+        accessTokenCookie.setSecure(true);
+        accessTokenCookie.setHttpOnly(true);  //이거 포함시키면 클라이언트측에서 토큰값 못받아옴.
         accessTokenCookie.setMaxAge(60 * 60); // 1 hour
 
         Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
         refreshTokenCookie.setPath("/");
-//        refreshTokenCookie.setSecure(true);
-//        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setHttpOnly(true);
         refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days
 
         // 응답에 쿠키 추가

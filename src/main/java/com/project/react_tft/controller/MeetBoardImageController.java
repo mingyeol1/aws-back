@@ -1,74 +1,103 @@
 package com.project.react_tft.controller;
 
-import com.amazonaws.services.s3.AmazonS3Client;
-import com.amazonaws.services.s3.model.ObjectMetadata;
 import com.project.react_tft.dto.image.ImageResultDTO;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import net.coobird.thumbnailator.Thumbnailator;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.HttpStatus;
+import org.springframework.core.io.FileSystemResource;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 @RestController
 @RequiredArgsConstructor
-@Log4j2
 public class MeetBoardImageController {
 
-    private final AmazonS3Client amazonS3Client;
-
-    @Value("${cloud.aws.s3.bucket}")
-    private String bucket;
+    @Value("C:\\upload")
+    private String uploadPath;
 
     @PostMapping(value = "/upload", consumes = "multipart/form-data")
     public ResponseEntity<List<ImageResultDTO>> upload(@RequestPart("files") List<MultipartFile> files) {
+
         List<ImageResultDTO> list = new ArrayList<>();
 
-        files.forEach(file -> {
-            String originalFilename = file.getOriginalFilename();
-            String uuid = UUID.randomUUID().toString();
-            String s3Filename = uuid + "_" + originalFilename;
+        if (files != null && !files.isEmpty()) {
+            files.forEach(multipartFile -> {
+                String originalName = multipartFile.getOriginalFilename();
+                String uuid = UUID.randomUUID().toString();
+                Path savePath = Paths.get(uploadPath + File.separator + uuid + "_" + originalName);
 
-            ObjectMetadata metadata = new ObjectMetadata();
-            metadata.setContentType(file.getContentType());
-            metadata.setContentLength(file.getSize());
+                boolean image = false;
 
-            try {
-                amazonS3Client.putObject(bucket, s3Filename, file.getInputStream(), metadata);
-                String s3Url = amazonS3Client.getUrl(bucket, s3Filename).toString();
+                try {
+                    multipartFile.transferTo(savePath);
+
+                    if (Files.probeContentType(savePath).startsWith("image")) {
+                        image = true;
+
+                        File thumbFile = new File(uploadPath, "s_" + uuid + "_" + originalName);
+                        Thumbnailator.createThumbnail(savePath.toFile(), thumbFile, 200, 200);
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
 
                 list.add(ImageResultDTO.builder()
                         .uuid(uuid)
-                        .fileName(originalFilename)
-                        .img(true)
-                        .s3Url(s3Url)
-                        .build());
-            } catch (IOException e) {
-                log.error("Error uploading file", e);
-            }
-        });
-
-        return ResponseEntity.ok(list);
-    }
-
-    @DeleteMapping("/remove/{fileName}")
-    public ResponseEntity<Boolean> removeFile(@PathVariable String fileName) {
-        try {
-            amazonS3Client.deleteObject(bucket, fileName);
-            return ResponseEntity.ok(true);
-        } catch (Exception e) {
-            log.error("Error deleting file", e);
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(false);
+                        .fileName(originalName)
+                        .img(image).build()
+                );
+            });
+            return ResponseEntity.ok(list);
+        } else {
+            return ResponseEntity.badRequest().body(Collections.emptyList());
         }
     }
 
+    @DeleteMapping("/remove/{fileName}")
+    public ResponseEntity<Boolean> removeFile(@PathVariable String fileName){
+        File file = new File(uploadPath + File.separator + fileName);
+        boolean removed = false;
+
+        try {
+            removed = file.delete();
+
+            if (fileName.startsWith("s_")) {
+                File thumbnailFile = new File(uploadPath + File.separator + "s_" + fileName);
+                thumbnailFile.delete();
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.ok(removed);
+    }
+
     @GetMapping("/view/{fileName}")
-    public ResponseEntity<String> viewFile(@PathVariable String fileName) {
-        String s3Url = amazonS3Client.getUrl(bucket, fileName).toString();
-        return ResponseEntity.ok(s3Url);
+    public ResponseEntity<Resource> viewFile(@PathVariable String fileName) {
+        Resource resource = new FileSystemResource(uploadPath + File.separator + fileName);
+
+        if (!resource.exists()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        HttpHeaders headers = new HttpHeaders();
+        try {
+            headers.add("Content-Type", Files.probeContentType(resource.getFile().toPath()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return ResponseEntity.ok().headers(headers).body(resource);
     }
 }

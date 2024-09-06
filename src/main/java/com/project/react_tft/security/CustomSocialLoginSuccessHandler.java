@@ -47,45 +47,28 @@ public class CustomSocialLoginSuccessHandler implements AuthenticationSuccessHan
         claims.put("mid", memberSecurityDTO.getMid());
         claims.put("memail", memberSecurityDTO.getMemail());
 
-        String accessToken = jwtUtil.generateToken(claims, 1);  // 1시간 유효
-        String refreshToken = jwtUtil.generateToken(claims, 30);  // 30일 유효
+        String accessToken = jwtUtil.generateToken(claims, 1);
+        String refreshToken = jwtUtil.generateToken(claims, 30);
 
-        // HTTPS 환경 여부 확인 (배포 환경)
-        boolean isSecure = request.isSecure(); // 배포 환경은 HTTPS이므로 true여야 함
+        // 쿠키 생성
+        Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
+        accessTokenCookie.setPath("/");
+//        accessTokenCookie.setSecure(true);
+//        accessTokenCookie.setHttpOnly(true);  이거 포함시키면 클라이언트측에서 토큰값 못받아옴.
+        accessTokenCookie.setMaxAge(60 * 60); // 1 hour
 
-        // 쿠키를 수동으로 헤더에 추가하면서 SameSite 설정
-        String accessTokenCookie = String.format(
-                "accessToken=%s; Path=/; Max-Age=%d; SameSite=None; %s",
-                accessToken,
-                60 * 60, // 1 hour
-                isSecure ? "Secure; HttpOnly" : "HttpOnly" // HTTPS일 경우 Secure 추가
-        );
+        Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
+        refreshTokenCookie.setPath("/");
+//        refreshTokenCookie.setSecure(true);
+//        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days
 
-        String refreshTokenCookie = String.format(
-                "refreshToken=%s; Path=/; Max-Age=%d; SameSite=None; %s",
-                refreshToken,
-                60 * 60 * 24 * 30, // 30 days
-                isSecure ? "Secure; HttpOnly" : "HttpOnly"
-        );
+        // 응답에 쿠키 추가
+        response.addCookie(accessTokenCookie);
+        response.addCookie(refreshTokenCookie);
 
-        // 헤더에 쿠키 추가
-        response.addHeader("Set-Cookie", accessTokenCookie);
-        response.addHeader("Set-Cookie", refreshTokenCookie);
+        // 클라이언트로 리다이렉트
 
-        // 배포 환경 리다이렉트
-        String redirectUrl = "https://www.tft.p-e.kr";  // 배포된 URL
-
-        /*
-         * 로컬에서 실행할 경우:
-         * 1. isSecure를 false로 강제 설정 (로컬에서는 HTTPS 사용 불가)
-         * 2. redirectUrl을 로컬 URL로 변경
-         *
-         *
-         * boolean isSecure = false; // 로컬에서는 HTTPS가 아니므로 false로 설정
-         * String redirectUrl = "http://localhost:3000/";  // 로컬 환경의 React 앱 URL
-         */
-
-        // 클라이언트로 리다이렉트 (배포 환경)
-        response.sendRedirect(redirectUrl);
+        response.sendRedirect("https://www.tft.p-e.kr");
     }
 }

@@ -21,6 +21,7 @@ public class MeetBoardListAllDTO {
     private String meetContent;
     private LocalDateTime regDate;
     private Long replyCount;
+    private List<String> imageUrls; // S3 URL을 저장할 필드
 
     private List<MeetBoardImageDTO> meetBoardImages;
 }

@@ -17,7 +17,7 @@ public class ImageResultDTO {
 
     private boolean img;
 
-    private String url;
+    private String s3Url;
 
     public String getLink(){
 

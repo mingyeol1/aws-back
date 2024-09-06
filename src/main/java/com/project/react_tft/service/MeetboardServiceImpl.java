@@ -29,7 +29,6 @@ import java.util.stream.Collectors;
 @Log4j2
 public class MeetboardServiceImpl implements MeetBoardService {
 
-
     @Value("${cloud.aws.s3.bucket}")
     private String bucket;
 
@@ -149,6 +148,11 @@ public class MeetboardServiceImpl implements MeetBoardService {
                 .total((int) result.getTotalElements())
                 .build();
     }
+
+
+
+
+
 
 }
 

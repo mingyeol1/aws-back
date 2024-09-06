@@ -47,10 +47,11 @@ public class CustomSocialLoginSuccessHandler implements AuthenticationSuccessHan
         claims.put("mid", memberSecurityDTO.getMid());
         claims.put("memail", memberSecurityDTO.getMemail());
 
-        String accessToken = jwtUtil.generateToken(claims, 1);
-        String refreshToken = jwtUtil.generateToken(claims, 30);
+        String accessToken = jwtUtil.generateToken(claims, 1);  // 1시간 유효
+        String refreshToken = jwtUtil.generateToken(claims, 30);  // 30일 유효
 
-        boolean isSecure = request.isSecure(); // HTTPS 환경 여부 확인
+        // HTTPS 환경 여부 확인 (배포 환경)
+        boolean isSecure = request.isSecure(); // 배포 환경은 HTTPS이므로 true여야 함
 
         // 쿠키를 수동으로 헤더에 추가하면서 SameSite 설정
         String accessTokenCookie = String.format(
@@ -71,8 +72,20 @@ public class CustomSocialLoginSuccessHandler implements AuthenticationSuccessHan
         response.addHeader("Set-Cookie", accessTokenCookie);
         response.addHeader("Set-Cookie", refreshTokenCookie);
 
-        // 클라이언트로 리다이렉트 (배포와 로컬 환경에 따라 구분)
-        String redirectUrl = isSecure ? "https://www.tft.p-e.kr" : "http://localhost:3000/";
+        // 배포 환경 리다이렉트
+        String redirectUrl = "https://www.tft.p-e.kr";  // 배포된 URL
+
+        /*
+         * 로컬에서 실행할 경우:
+         * 1. isSecure를 false로 강제 설정 (로컬에서는 HTTPS 사용 불가)
+         * 2. redirectUrl을 로컬 URL로 변경
+         *
+         *
+         * boolean isSecure = false; // 로컬에서는 HTTPS가 아니므로 false로 설정
+         * String redirectUrl = "http://localhost:3000/";  // 로컬 환경의 React 앱 URL
+         */
+
+        // 클라이언트로 리다이렉트 (배포 환경)
         response.sendRedirect(redirectUrl);
     }
 }

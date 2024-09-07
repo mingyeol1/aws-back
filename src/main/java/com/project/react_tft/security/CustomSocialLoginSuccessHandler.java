@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -23,6 +24,9 @@ public class CustomSocialLoginSuccessHandler implements AuthenticationSuccessHan
 
     private final PasswordEncoder passwordEncoder;
     private final JWTUtil jwtUtil;
+
+    @Value("${app.cookie.domain}")
+    private String cookieDomain;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request,
@@ -53,22 +57,29 @@ public class CustomSocialLoginSuccessHandler implements AuthenticationSuccessHan
         // 쿠키 생성
         Cookie accessTokenCookie = new Cookie("accessToken", accessToken);
         accessTokenCookie.setPath("/");
-//        accessTokenCookie.setSecure(true);
-//        accessTokenCookie.setHttpOnly(true);  이거 포함시키면 클라이언트측에서 토큰값 못받아옴.
+        accessTokenCookie.setSecure(true);
+        accessTokenCookie.setHttpOnly(false);  // 클라이언트에서 접근 가능하도록 설정
         accessTokenCookie.setMaxAge(60 * 60); // 1 hour
+        accessTokenCookie.setDomain(cookieDomain);
+        accessTokenCookie.setAttribute("SameSite", "None");
 
         Cookie refreshTokenCookie = new Cookie("refreshToken", refreshToken);
         refreshTokenCookie.setPath("/");
-//        refreshTokenCookie.setSecure(true);
-//        refreshTokenCookie.setHttpOnly(true);
+        refreshTokenCookie.setSecure(true);
+        refreshTokenCookie.setHttpOnly(true);  // refresh token은 HttpOnly로 설정
         refreshTokenCookie.setMaxAge(60 * 60 * 24 * 30); // 30 days
+        refreshTokenCookie.setDomain(cookieDomain);
+        refreshTokenCookie.setAttribute("SameSite", "None");
 
         // 응답에 쿠키 추가
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
 
-        // 클라이언트로 리다이렉트
+        // CORS 헤더 설정
+        response.setHeader("Access-Control-Allow-Origin", "https://www.tft.p-e.kr");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
 
+        // 클라이언트로 리다이렉트
         response.sendRedirect("https://www.tft.p-e.kr");
     }
 }

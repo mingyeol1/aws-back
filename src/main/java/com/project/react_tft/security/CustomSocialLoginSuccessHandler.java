@@ -75,9 +75,7 @@ public class CustomSocialLoginSuccessHandler implements AuthenticationSuccessHan
         response.addCookie(accessTokenCookie);
         response.addCookie(refreshTokenCookie);
 
-        // CORS 헤더 설정
-        response.setHeader("Access-Control-Allow-Origin", "https://www.tft.p-e.kr");
-        response.setHeader("Access-Control-Allow-Credentials", "true");
+
 
         // 클라이언트로 리다이렉트
         response.sendRedirect("https://www.tft.p-e.kr");

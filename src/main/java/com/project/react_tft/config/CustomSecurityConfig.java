@@ -59,7 +59,8 @@ public class CustomSecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable) // CSRF 비활성화
                 .authorizeHttpRequests(authorize -> authorize
                                 .requestMatchers("/api/auth/login", "/api/auth/signUp","/api/meet/list", "/view/").permitAll() // 인증 없이 접근 가능 경로 설정
-                        .anyRequest().permitAll() // 다른 모든 요청은 인증 필요
+                                .requestMatchers("/api/public/**").permitAll() // 새로 추가된 공개 API 허용
+                                .anyRequest().permitAll() // 다른 모든 요청은 인증 필요
 //                                .anyRequest().authenticated()  //이거 쓰면 에러가 좀 있어요
                 )
                 .sessionManagement(httpSecuritySessionManagementConfigurer -> // 세션 비활성화

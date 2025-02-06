@@ -8,7 +8,6 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -58,23 +57,22 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Member login(String mid, String mpw) {
-        Member member = memberRepository.findById(mid).orElseThrow(() -> new UsernameNotFoundException("유저가 존재하지 않음."));
+        Optional<Member> member = memberRepository.findById(mid);
 
-        if (member.isDel()){
-            throw new UsernameNotFoundException("이미 삭제된 아이디");
-        }
+        log.info("조회된 회원 정보: {}", member);  // 조회 결과 로그 추가
 
-
-        if (passwordEncoder.matches(mpw, member.getMpw())) {
-            return member;
-        }else {
-            log.info("비밀번호가 틀렸는데요.");
+        if (member.isPresent()) {
+            if (passwordEncoder.matches(mpw, member.get().getMpw())) {
+                return member.get();
+            } else {
+                log.info("비밀번호가 틀렸는데요.");
+                throw new RuntimeException("비밀번호 및 아이디가 다릅니다.");
+            }
+        } else {
+            log.info("아이디가 없는데요. mid: {}", mid);
             throw new RuntimeException("비밀번호 및 아이디가 다릅니다.");
         }
-
-
     }
-
 
     @Override
     public void modify(MemberDTO memberDTO) throws MemberMidExistException {

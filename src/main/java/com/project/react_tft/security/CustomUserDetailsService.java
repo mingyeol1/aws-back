@@ -28,16 +28,11 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String mid) throws UsernameNotFoundException {
         log.info("loadUserByUsername : " + mid);
 
-        // DB에 등록된 사용자 정보를 불러오기.
-        Optional<Member> result = memberRepository.findById(mid);
-        log.info("result:::::::::::::::::::::: " + result);
 
-        // 결과가 없는 경우에 UserDetails에 있는 예외 처리 클래스를 호출
-        if(result.isEmpty()){
-            throw new UsernameNotFoundException("유저가 없는데요???????????????????"); //스프링 시큐리티가 가져온 예외
-        }
+       Member member = memberRepository.findById(mid).orElseThrow(() -> new UsernameNotFoundException("유저가 존재하지 않음."));
 
-        Member member = result.get();
+//        log.info("여기는 닿습니까??");
+
 
 
         if (member.getRoleSet().isEmpty()){

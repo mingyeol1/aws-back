@@ -47,38 +47,49 @@ public class MemberController {
         }
     }
 
-    @CrossOrigin(origins = "https://www.tft.p-e.kr")
+    @GetMapping("/login")
+    public ResponseEntity<?> getLogin(){
+        log.info("접근접근완료");
+        return ResponseEntity.ok("접근완료요요요요!!!");
+    }
+
+//    @CrossOrigin(origins = "https://www.tft.p-e.kr")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody MemberDTO dto) {
-        Member member = memberService.login(dto.getMid(), dto.getMpw());
 
-        if (member != null) {
-            UserDetails userDetails = customUserDetailsService.loadUserByUsername(dto.getMid());
+        try {
+            Member member = memberService.login(dto.getMid(), dto.getMpw());
 
-            // 토큰 생성
-            UsernamePasswordAuthenticationToken authenticationToken =
-                    new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
+            if (member != null) {
+                UserDetails userDetails = customUserDetailsService.loadUserByUsername(dto.getMid());
 
-            // 인증 설정
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+                // 토큰 생성
+                UsernamePasswordAuthenticationToken authenticationToken =
+                        new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
 
-            // Payload 값 보내기
-            Map<String, Object> claim = new HashMap<>();
-            claim.put("mid", member.getMid());
-            claim.put("mpw", member.getMpw());
-            claim.put("role", userDetails.getAuthorities().stream()
-                    .map(GrantedAuthority::getAuthority)
-                    .collect(Collectors.toList()));
+                // 인증 설정
+                SecurityContextHolder.getContext().setAuthentication(authenticationToken);
 
-            String accessToken = jwtUtil.generateToken(claim, 1);
-            String refreshToken = jwtUtil.generateToken(claim, 30);
+                // Payload 값 보내기
+                Map<String, Object> claim = new HashMap<>();
+                claim.put("mid", member.getMid());
+                claim.put("mpw", member.getMpw());
+                claim.put("role", userDetails.getAuthorities().stream()
+                        .map(GrantedAuthority::getAuthority)
+                        .collect(Collectors.toList()));
 
-            Map<String, String> tokens = Map.of("accessToken", accessToken, "refreshToken", refreshToken);
+                String accessToken = jwtUtil.generateToken(claim, 1);
+                String refreshToken = jwtUtil.generateToken(claim, 30);
 
-            return ResponseEntity.ok(tokens);
-        } else {
-            log.info("아이디 없을지도.");
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("아이디 및 비밀번호 오류임.");
+                Map<String, String> tokens = Map.of("accessToken", accessToken, "refreshToken", refreshToken);
+
+                return ResponseEntity.ok(tokens);
+            } else {
+                log.info("아이디 없을지도.");
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("아이디 및 비밀번호 오류임.");
+            }
+        }catch (Exception e){
+            return ResponseEntity.ok(e.getMessage());
         }
     }
 

@@ -40,7 +40,7 @@ import java.util.Arrays;
 public class CustomSecurityConfig {
 
     private final DataSource dataSource;
-    private final UserDetailsService userDetailsService;
+ //   private final UserDetailsService userDetailsService; 필요 없는 값 지움.
     private final PasswordEncoder passwordEncoder;
     private final JWTUtil jwtUtil;
     private final CustomUserDetailsService customUserDetailsService;
@@ -72,7 +72,7 @@ public class CustomSecurityConfig {
                 http.getSharedObject(AuthenticationManagerBuilder.class);
 
         authenticationManagerBuilder
-                .userDetailsService(userDetailsService)
+                .userDetailsService(customUserDetailsService)
                 .passwordEncoder(passwordEncoder);
 
         // 인증 매니저 등록
@@ -90,12 +90,16 @@ public class CustomSecurityConfig {
             httpSecurityOAuth2LoginConfigurer.successHandler(authenticationSuccessHandler());
         });
 
+
+
+
         // API Login SuccessHandler 설정
         UserLoginSuccessHandler successHandler = new UserLoginSuccessHandler(jwtUtil);
         loginFilter.setAuthenticationSuccessHandler(successHandler);
 
-        http.addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class);
-        http.addFilterBefore(tokenCheckFilter(jwtUtil, customUserDetailsService), UsernamePasswordAuthenticationFilter.class);
+        //왜인지 모르겠으나 사용하면 service login을 건너 띄고 CustomUserDetailsService 로 바로 넘어감.
+//        http.addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class);
+        http.addFilterAfter(tokenCheckFilter(jwtUtil, customUserDetailsService), UsernamePasswordAuthenticationFilter.class);
 
         // CORS 설정
         http.cors(httpSecurityCorsConfigurer -> {
@@ -106,7 +110,7 @@ public class CustomSecurityConfig {
         http.rememberMe(httpSecurityRememberMeConfigurer -> {
             httpSecurityRememberMeConfigurer.key("12345678")
                     .tokenRepository(persistentTokenRepository())
-                    .userDetailsService(userDetailsService)
+                    .userDetailsService(customUserDetailsService)
                     .tokenValiditySeconds(60 * 60 * 24 * 30);
         });
 

@@ -40,7 +40,7 @@ import java.util.Arrays;
 public class CustomSecurityConfig {
 
     private final DataSource dataSource;
-    private final UserDetailsService userDetailsService;
+//    private final UserDetailsService userDetailsService; 주입을 잘못받은듯.
     private final PasswordEncoder passwordEncoder;
     private final JWTUtil jwtUtil;
     private final CustomUserDetailsService customUserDetailsService;
@@ -72,7 +72,7 @@ public class CustomSecurityConfig {
                 http.getSharedObject(AuthenticationManagerBuilder.class);
 
         authenticationManagerBuilder
-                .userDetailsService(userDetailsService)
+                .userDetailsService(customUserDetailsService)
                 .passwordEncoder(passwordEncoder);
 
         // 인증 매니저 등록
@@ -108,7 +108,7 @@ public class CustomSecurityConfig {
         http.rememberMe(httpSecurityRememberMeConfigurer -> {
             httpSecurityRememberMeConfigurer.key("12345678")
                     .tokenRepository(persistentTokenRepository())
-                    .userDetailsService(userDetailsService)
+                    .userDetailsService(customUserDetailsService)
                     .tokenValiditySeconds(60 * 60 * 24 * 30);
         });
 

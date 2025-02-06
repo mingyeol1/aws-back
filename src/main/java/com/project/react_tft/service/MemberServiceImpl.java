@@ -60,7 +60,7 @@ public class MemberServiceImpl implements MemberService {
     @Override
     public Member login(String mid, String mpw) {
         Member member = memberRepository.findById(mid)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 다릅니다."));
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 다릅니다.")); //RuntimeException 으로 했다가 프론트에서 401 값을 받을 수 있게 StatusException으로 변경
 
         if (member.isDel()) {
             log.info("이미 삭제된 아이디");

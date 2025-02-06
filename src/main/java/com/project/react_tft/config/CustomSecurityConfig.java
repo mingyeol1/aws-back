@@ -94,7 +94,9 @@ public class CustomSecurityConfig {
         UserLoginSuccessHandler successHandler = new UserLoginSuccessHandler(jwtUtil);
         loginFilter.setAuthenticationSuccessHandler(successHandler);
 
-        http.addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class);
+
+        //이걸 사용하면 service로직을 건너뜀 왜인지는 잘 모르겠음.
+//        http.addFilterBefore(loginFilter, UsernamePasswordAuthenticationFilter.class);
         http.addFilterBefore(tokenCheckFilter(jwtUtil, customUserDetailsService), UsernamePasswordAuthenticationFilter.class);
 
         // CORS 설정

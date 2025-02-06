@@ -8,8 +8,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.modelmapper.ModelMapper;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -57,22 +59,22 @@ public class MemberServiceImpl implements MemberService {
 
     @Override
     public Member login(String mid, String mpw) {
-        Optional<Member> member = memberRepository.findById(mid);
+        Member member = memberRepository.findById(mid)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 다릅니다."));
 
-        log.info("조회된 회원 정보: {}", member);  // 조회 결과 로그 추가
-
-        if (member.isPresent()) {
-            if (passwordEncoder.matches(mpw, member.get().getMpw())) {
-                return member.get();
-            } else {
-                log.info("비밀번호가 틀렸는데요.");
-                throw new RuntimeException("비밀번호 및 아이디가 다릅니다.");
-            }
-        } else {
-            log.info("아이디가 없는데요. mid: {}", mid);
-            throw new RuntimeException("비밀번호 및 아이디가 다릅니다.");
+        if (member.isDel()) {
+            log.info("이미 삭제된 아이디");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "삭제된 아이디입니다.");
         }
+
+        if (!passwordEncoder.matches(mpw, member.getMpw())) {
+            log.info("비밀번호가 틀렸습니다.");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "아이디 또는 비밀번호가 다릅니다");
+        }
+
+        return member;
     }
+
 
     @Override
     public void modify(MemberDTO memberDTO) throws MemberMidExistException {

@@ -42,6 +42,10 @@ public class MeetBoard extends BaseEntity{
    @BatchSize(size = 20)
    private Set<MeetBoardImage> imageSet = new HashSet<>();
 
+   @OneToMany(mappedBy = "meetBoard"
+           ,orphanRemoval = true)
+   private Set<MeetReply> meetReply = new HashSet<>();
+
    public void addImage(String uuid, String fileName){
       MeetBoardImage meetBoardImage = MeetBoardImage.builder()
               .uuid(uuid)

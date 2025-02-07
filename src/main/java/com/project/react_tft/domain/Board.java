@@ -3,6 +3,9 @@ package com.project.react_tft.domain;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.HashSet;
+import java.util.Set;
+
 @Entity
 @Getter
 @Builder
@@ -23,6 +26,10 @@ public class Board extends BaseEntity{
 
     @Column(length = 50, nullable = false)
     private String writer;
+
+    @OneToMany(mappedBy = "board"
+            ,orphanRemoval = true)
+    private Set<Reply> reply = new HashSet<>();
 
 
     public void change(String title, String content){

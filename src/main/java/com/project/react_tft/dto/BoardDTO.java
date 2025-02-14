@@ -24,8 +24,8 @@ public class BoardDTO {
     @NotEmpty
     private String content;
 
-    @NotEmpty
-    private String writer;
+    private String mid;
+    private String mnick;
 
     private LocalDateTime regDate;
 

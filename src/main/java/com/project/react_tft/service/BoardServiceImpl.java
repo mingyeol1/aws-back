@@ -1,6 +1,8 @@
 package com.project.react_tft.service;
 
+import com.project.react_tft.Repository.MemberRepository;
 import com.project.react_tft.domain.Board;
+import com.project.react_tft.domain.Member;
 import com.project.react_tft.domain.Reply;
 import com.project.react_tft.dto.*;
 import com.project.react_tft.Repository.BoardRepository;
@@ -28,14 +30,20 @@ public class BoardServiceImpl implements BoardService{
 
     private final BoardRepository boardRepository;
 
+    private final MemberRepository memberRepository;
+
     @Override
     public Long register(BoardDTO boardDTO){
 
+        Member member = memberRepository.findById(boardDTO.getMid()).orElseThrow(() -> new IllegalArgumentException("비어있음"));
+
         Board board = modelMapper.map(boardDTO, Board.class);
 
-        Long bno = boardRepository.save(board).getBno();
+        board.setMember(member);
 
-        return bno;
+        Board board1= boardRepository.save(board);
+
+        return board1.getBno();
     }
 
     @Override
@@ -46,6 +54,12 @@ public class BoardServiceImpl implements BoardService{
         Board board = result.orElseThrow();
 
         BoardDTO boardDTO = modelMapper.map(board, BoardDTO.class);
+
+        // 매핑이 자동으로 이루어지지 않아서 Member 정보 직접 매핑
+        if (board.getMember() != null) {
+            boardDTO.setMid(board.getMember().getMid());
+            boardDTO.setMnick(board.getMember().getMnick());
+        }
 
         return boardDTO;
     }
@@ -75,9 +89,16 @@ public class BoardServiceImpl implements BoardService{
 
         Page<Board> result = boardRepository.searchAll(types, keyword, pageable);
 
-        // 변환... Board -> BoardDTO
         List<BoardDTO> dtoList = result.getContent().stream()
-                .map(board -> modelMapper.map(board, BoardDTO.class))
+                .map(board -> {
+                    BoardDTO dto = modelMapper.map(board, BoardDTO.class);
+                    // 매핑이 자동으로 이루어지지 않아서 Member 정보 직접 매핑
+                    if (board.getMember() != null) {
+                        dto.setMid(board.getMember().getMid());
+                        dto.setMnick(board.getMember().getMnick());
+                    }
+                    return dto;
+                })
                 .collect(Collectors.toList());
 
         return PageResponseDTO.<BoardDTO>withAll()

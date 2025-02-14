@@ -8,6 +8,7 @@ import java.util.Set;
 
 @Entity
 @Getter
+@Setter
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
@@ -24,8 +25,9 @@ public class Board extends BaseEntity{
     @Column(length = 2000, nullable = false)
     private String content;
 
-    @Column(length = 50, nullable = false)
-    private String writer;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "member_mid")
+    private Member member;
 
     @OneToMany(mappedBy = "board"
             ,orphanRemoval = true)

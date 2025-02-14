@@ -71,7 +71,7 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements  Board
                         booleanBuilder.or(board.content.contains(keyword));// content like concat('%',keyword,'%')
                         break;
                     case "w":
-                        booleanBuilder.or(board.writer.contains(keyword)); // writer like concat('%',keyword,'%')
+                        booleanBuilder.or(board.member.mnick.contains(keyword)); // writer like concat('%',keyword,'%')
                         break;
                 }
             }  // for end
@@ -121,7 +121,7 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements  Board
                     booleanBuilder.or(board.content.contains(keyword));// content like concat('%',keyword,'%')
                     break;
                 case "w":
-                    booleanBuilder.or(board.writer.contains(keyword)); // writer like concat('%',keyword,'%')
+                    booleanBuilder.or(board.member.mnick.contains(keyword)); // writer like concat('%',keyword,'%')
                     break;
             }
         }  // for end
@@ -139,7 +139,7 @@ public class BoardSearchImpl extends QuerydslRepositorySupport implements  Board
                 bean(BoardListReplyCountDTO.class,
                         board.bno,
                         board.title,
-                        board.writer,
+                        board.member.mnick,
                         board.regDate,
                         reply.count().as("replyCount")
                 ));

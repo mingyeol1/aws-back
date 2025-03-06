@@ -35,6 +35,8 @@ public class BoardServiceImpl implements BoardService{
     @Override
     public Long register(BoardDTO boardDTO){
 
+        log.info(boardDTO.getMid() + "현재 받아오는 mid!!@#!@#@!#@!#!@#!@");
+
         Member member = memberRepository.findById(boardDTO.getMid()).orElseThrow(() -> new IllegalArgumentException("비어있음"));
 
         Board board = modelMapper.map(boardDTO, Board.class);

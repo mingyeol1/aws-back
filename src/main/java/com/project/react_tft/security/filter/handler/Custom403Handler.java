@@ -18,7 +18,7 @@ public class Custom403Handler implements AccessDeniedHandler {
                        AccessDeniedException accessDeniedException) throws IOException, ServletException {
         log.info("--------------------------ACCESS DENIED ------------------------------");
 
-        response.setStatus(HttpStatus.FORBIDDEN.value()); //FORBIDDEN.value() 403 에러를 띄워주라
+        response.setStatus(HttpStatus.FORBIDDEN.value()); //FORBIDDEN.value() 403 에러를 띄워주라.
 
         // JSON 요청이었는지 홧인
         String contentType = request.getHeader("Content-Type");

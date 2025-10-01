@@ -61,7 +61,7 @@ public class CustomSecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/auth/login", "/api/auth/signUp", "/api/meet/list", "/view/").permitAll()
+                        .requestMatchers("/api/auth/login", "/api/auth/signUp", "/api/meet/list", "/view/", "/board/list").permitAll()
                         .requestMatchers("/api/public/**").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll() // CORS Preflight 요청 허용
                         .anyRequest().authenticated()

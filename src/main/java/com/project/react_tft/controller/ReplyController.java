@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 @RestController
-@RequestMapping("/replies")
+@RequestMapping("/api/replies")
 @Log4j2
 @RequiredArgsConstructor    // 의존성 주입을 위한
 public class ReplyController {

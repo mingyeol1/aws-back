@@ -24,7 +24,7 @@ import java.util.NoSuchElementException;
 @RestController
 @Log4j2
 @RequiredArgsConstructor
-@RequestMapping("/board")
+@RequestMapping("/api/board")
 public class BoardController {
 
     private final BoardService boardService;

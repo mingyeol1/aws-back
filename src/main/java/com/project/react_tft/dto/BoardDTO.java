@@ -1,5 +1,6 @@
 package com.project.react_tft.dto;
 
+import com.project.react_tft.domain.Board;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.Size;
 import lombok.AllArgsConstructor;
@@ -30,4 +31,9 @@ public class BoardDTO {
     private LocalDateTime regDate;
 
     private LocalDateTime modDate;
+
+    public void getBoardIdByMnick(String mid, String mnick) {
+        this.mid = mid;
+        this.mnick = mnick;
+    }
 }

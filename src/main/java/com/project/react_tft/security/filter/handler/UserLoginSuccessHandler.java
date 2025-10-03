@@ -31,9 +31,9 @@ public class UserLoginSuccessHandler implements AuthenticationSuccessHandler {
 
         Map<String, Object> claim = Map.of("mid", authentication.getName());
         //Access Token 유효기간
-        String accessToken = jwtUtil.generateToken(claim,1); //1일
+        String accessToken = jwtUtil.generateToken(claim,1); //1시간
         //Refresh Token 유효기간
-        String refreshToken = jwtUtil.generateToken(claim,30); //30일
+        String refreshToken = jwtUtil.generateToken(claim,30); //30시간
 
         Gson gson= new Gson();
 

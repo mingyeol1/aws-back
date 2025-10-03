@@ -64,7 +64,7 @@ public class MemberServiceImpl implements MemberService {
 
         if (member.isDel()) {
             log.info("이미 삭제된 아이디");
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "삭제된 아이디입니다.");
+            throw new IllegalArgumentException("이미 삭제된 아이디");
         }
 
         if (!passwordEncoder.matches(mpw, member.getMpw())) {
@@ -85,7 +85,7 @@ public class MemberServiceImpl implements MemberService {
             Member member = optionalMember.get();
 
             // 현재 유저의 닉네임과 이메일을 제외하고 중복 검사
-            // 소셜로그인시 수정하면 nullPointerException 때문에 member.getMnick() != null 를 넣어줌.
+            // 소셜로그인시 수정하면 nullPointerException 때문에 member.getMnick() != null 를 넣어줌..
             if (member.getMnick() != null && !member.getMnick().equals(memberDTO.getMnick()) && memberRepository.existsByMnick(memberDTO.getMnick())) {
                 log.info("이미 있는 닉네임인데요");
                 throw new MemberMidExistException();

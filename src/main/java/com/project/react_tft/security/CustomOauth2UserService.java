@@ -63,10 +63,11 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
 
         // 데이터베이스에 해당 이메일 사용자가 없는 경우...
         if (result.isEmpty()) {
-            // 회원 추가... mid는 이메일 주소 / 패스워드 1111
+            // 회원 추가... mid는 이메일 주소 / 패스워드 1111.
             Member member = Member.builder()
                     .mid(memail)
                     .mpw(passwordEncoder.encode("1111"))
+
                     .memail(memail)
                     .mnick(mnick)
                     .social(true)
@@ -106,10 +107,10 @@ public class CustomOauth2UserService extends DefaultOAuth2UserService {
     // getKakaoEmail() 만들기... : KAKAO에서 전달된 정보를 통해서 Email 반환 처리
     private String getKakaoEmail(Map<String, Object> paramMap) {
         log.info("Kakao ....................................");
-        Object value = paramMap.get("kakao_account");
+        Object value = paramMap.get("kakao_account");   // 카카오에서 받은 데이터를 map형태로 반환.
         log.info("----------------------" + value);
 
-        LinkedHashMap accountMap = (LinkedHashMap) value;
+        LinkedHashMap accountMap = (LinkedHashMap) value;   // LinkedHashMap으로 이메일 정보 추출.
         String email = (String) accountMap.get("email");
         log.info("Email................... : " + email);
         return email;

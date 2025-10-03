@@ -29,11 +29,14 @@ public class BoardServiceImpl implements BoardService{
     private final ModelMapper modelMapper;
 
     private final BoardRepository boardRepository;
+    
 
     private final MemberRepository memberRepository;
 
     @Override
     public Long register(BoardDTO boardDTO){
+
+        log.info(boardDTO.getMid() + "현재 받아오는 mid!!@#!@#@!#@!#!@#!@");
 
         Member member = memberRepository.findById(boardDTO.getMid()).orElseThrow(() -> new IllegalArgumentException("비어있음"));
 
@@ -57,8 +60,10 @@ public class BoardServiceImpl implements BoardService{
 
         // 매핑이 자동으로 이루어지지 않아서 Member 정보 직접 매핑
         if (board.getMember() != null) {
-            boardDTO.setMid(board.getMember().getMid());
-            boardDTO.setMnick(board.getMember().getMnick());
+            boardDTO.getBoardIdByMnick(board.getMember().getMid(),
+                    board.getMember().getMnick());
+//            boardDTO.setMid(board.getMember().getMid());
+//            boardDTO.setMnick(board.getMember().getMnick());
         }
 
         return boardDTO;
@@ -88,6 +93,8 @@ public class BoardServiceImpl implements BoardService{
         Pageable pageable = pageRequestDTO.getPageable("bno");
 
         Page<Board> result = boardRepository.searchAll(types, keyword, pageable);
+
+
 
         List<BoardDTO> dtoList = result.getContent().stream()
                 .map(board -> {

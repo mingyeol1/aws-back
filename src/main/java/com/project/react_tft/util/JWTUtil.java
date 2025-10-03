@@ -19,7 +19,7 @@ public class JWTUtil {
     @Value("${jwt.secret}")
     private String key;
 
-    public String generateToken(Map<String, Object> valueMap, int days) {
+    public String generateToken(Map<String, Object> valueMap, int hour) {
         log.info("generate token key" + key);
 
         //헤더
@@ -29,10 +29,10 @@ public class JWTUtil {
 
         //페이로드 부분
         Map<String, Object> payloads = new HashMap<>();
-        payloads.putAll(valueMap);
+        payloads.putAll(valueMap);      // Member controller에서 받아오는 값.
 
         //유효시간.  토큰 생성시간.
-        int time = (60 * 24) * days; //시간설정. 60 * 24 는 하루
+        int time = (60 * 1) * hour; //시간설정. 60 * 24 는 하루
 
         String jwtStr = Jwts.builder()
                 .setHeader(headers)
@@ -52,6 +52,7 @@ public class JWTUtil {
          claims = Jwts.parser()
                 .setSigningKey(key.getBytes()).build()  // 서명 검증을 위한 키 설정
                 .parseSignedClaims(token)               // 토큰 파싱 및 클레임 추출
+
                 .getBody();
 
         return claims;

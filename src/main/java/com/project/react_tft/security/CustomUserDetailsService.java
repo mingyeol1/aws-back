@@ -40,7 +40,7 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("권한이 없는데요?????????????????????");
         }
 
-        //UserDetails 객체로 반환하는 userDetails를 생성..
+        //UserDetails 객체로 반환하는 userDetails를 생성...
         MemberSecurityDTO memberSecurityDTO = new MemberSecurityDTO(
                 member.getMid(),
                 member.getMpw(),

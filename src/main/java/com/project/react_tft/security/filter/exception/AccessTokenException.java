@@ -14,7 +14,7 @@ public class AccessTokenException extends RuntimeException{
     TOKEN_ERROR token_error;
 
     public enum TOKEN_ERROR{
-        UNACCEPT(401, "null or short"),
+        UNACCEPT(401, "null or short."),
         BADTYPE(401, "토큰 타입이  Bearer 인데요?"),
         MALFORM(403, "malform 토큰인데요????"),
         BADSIGN(403, "안좋은시그니쳐 토큰인데요??"),
